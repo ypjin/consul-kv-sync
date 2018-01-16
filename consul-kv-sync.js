@@ -21,6 +21,7 @@ program.version(pkg.version)
   .option('-v, --verbose', 'If present, verbose output provided.')
   .option('-u, --update', 'If present, extra keys in consul will not be deleted (update only)')
   .option('-g, --get <keypath>', 'If present, fetch keys under the provided keypath')
+  .option('--json', 'output keys and values in json (used with -g)')
   .on('--help', function() {
     console.log('  Examples:');
     console.log('');
@@ -41,7 +42,7 @@ let client = clientFactory(program);
 let workflow = workflowFactory(client, program.args);
 
 if (program.get) {
-  workflow.get(program.get);
+  workflow.get(program.get, program.json);
   return
 }
 
