@@ -20,7 +20,7 @@ program.version(pkg.version)
   .option('--ca <ca>', 'Path to trusted certificate in PEM format. Specify multiple times for multiple certificates.', collectCA, [])
   .option('-v, --verbose', 'If present, verbose output provided.')
   .option('-u, --update', 'If present, extra keys in consul will not be deleted (update only)')
-  .option('-g, --get <keypath>', 'If present, fetch keys under the provided keypath')
+  .option('-g, --get [keypath]', 'If present, fetch keys under the provided keypath')
   .option('--json', 'output keys and values in json (used with -g)')
   .on('--help', function() {
     console.log('  Examples:');
@@ -42,6 +42,9 @@ let client = clientFactory(program);
 let workflow = workflowFactory(client, program.args);
 
 if (program.get) {
+  if (program.get === true) { // no keypath provided to get all keys
+    program.get = "";
+  }
   workflow.get(program.get, program.json);
   return
 }
