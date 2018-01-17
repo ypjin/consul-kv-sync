@@ -19,6 +19,9 @@ program.version(pkg.version)
   .option('-s, --secure', 'Enable HTTPS. Environment variable: CONSUL_SECURE.')
   .option('--ca <ca>', 'Path to trusted certificate in PEM format. Specify multiple times for multiple certificates.', collectCA, [])
   .option('-v, --verbose', 'If present, verbose output provided.')
+  .option('-u, --update', 'If present, extra keys in consul will not be deleted (update only)')
+  .option('-g, --get [keypath]', 'If present, fetch keys under the provided keypath')
+  .option('--json', 'output keys and values in json (used with -g)')
   .on('--help', function() {
     console.log('  Examples:');
     console.log('');
@@ -31,17 +34,32 @@ program.version(pkg.version)
   });
 
 program.parse(process.argv);
-if (!program.args.length) {
-  program.outputHelp();
-  process.exit(1);
-}
 if (program.verbose) {
   log.transports.console.level = 'debug';
 }
 
 let client = clientFactory(program);
 let workflow = workflowFactory(client, program.args);
-workflow.exec().then(() => {
+
+if (program.get) {
+  if (program.get === true) { // no keypath provided to get all keys
+    program.get = "";
+  }
+  workflow.get(program.get, program.json);
+  return
+}
+
+if (!program.args.length) {
+  program.outputHelp();
+  process.exit(1);
+}
+
+var updateMethod = "exec";
+if (program.update) {
+  updateMethod = "update";
+}
+
+workflow[updateMethod]().then(() => {
   log.info('Sync completed. ' + workflow.stats.put + ' items set, ' + workflow.stats.deleted + ' items deleted.');
   log.info('Config:');
   log.info(workflow.config);
