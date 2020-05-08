@@ -19,8 +19,9 @@ program.version(pkg.version)
   .option('-s, --secure', 'Enable HTTPS. Environment variable: CONSUL_SECURE.')
   .option('--ca <ca>', 'Path to trusted certificate in PEM format. Specify multiple times for multiple certificates.', collectCA, [])
   .option('-v, --verbose', 'If present, verbose output provided.')
-  .option('-u, --update', 'If present, extra keys in consul will not be deleted (update only)')
-  .option('-g, --get [keypath]', 'If present, fetch keys under the provided keypath')
+  .option('-u, --update', 'extra keys in consul will not be deleted (update only)')
+  .option('-g, --get [keypath]', 'fetch keys under the provided keypath')
+  .option('-a, --add', 'only keys missing in consul will be added (no modification, no deletion)')
   .option('--json', 'output keys and values in json (used with -g)')
   .on('--help', function() {
     console.log('  Examples:');
@@ -57,6 +58,8 @@ if (!program.args.length) {
 var updateMethod = "exec";
 if (program.update) {
   updateMethod = "update";
+} else if (program.add) {
+  updateMethod = "add";
 }
 
 workflow[updateMethod]().then(() => {
